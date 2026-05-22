@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://apex-backend-rgh7.onrender.com',
+  // Prefer an explicit env override. Default to a relative URL so requests
+  // go to the same origin as the served frontend (avoids mixed-content errors).
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? '',
 });
 
 // Request interceptor to attach the JWT admin token to every request
@@ -37,6 +39,11 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    // Network-level failures will have no response
+    if (!error.response) {
+      console.error('API network error:', error.message || error);
+    }
+
     if (error.response?.status === 401) {
       // Clear token on 401 (unauthorized)
       localStorage.removeItem('admin_token');
