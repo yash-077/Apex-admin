@@ -44,7 +44,9 @@ export const AdminAuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      console.log(`Attempting admin login for: ${email}`);
       const res = await api.post('/api/admin/login', { email, password });
+      console.log('Admin login response:', res);
       
       if (res.data && res.data.success && res.data.data) {
         const { token: userToken, user } = res.data.data;
@@ -74,8 +76,10 @@ export const AdminAuthProvider = ({ children }) => {
         toast.success(`Access Granted. Welcome, ${user.name}!`);
         return true;
       }
+      console.warn('Unexpected response format:', res.data);
       return false;
     } catch (error) {
+      console.error('Admin login error:', error.response?.data || error.message || error);
       const message = error.response?.data?.message || 'Login failed. Please verify credentials.';
       toast.error(message);
       return false;
